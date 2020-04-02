@@ -13,6 +13,7 @@
     " Keep a dictionary of buffers opened/closed in different tabs
     let g:_tab_set = {}
 
+    let g:_test = []
 " }}}
 
 " --- Autocommands {{{
@@ -20,7 +21,7 @@
     augroup tab
         au!
 
-        au BufAdd,BufCreate * call tab#add_buffer(tabpagenr())
+        au BufAdd,VimEnter * call tab#add_buffer(tabpagenr())
         au BufDelete * call tab#remove_buffer(tabpagenr())
     augroup END
 

@@ -9,11 +9,15 @@
             let g:_tab_set[a:tabnr] = {}
         endif
 
-        let g:_tab_set[a:tabnr][bufnr()] = 1
+        let l:bufname = expand('<afile>')
+
+        if !empty(l:bufname)
+            let g:_tab_set[a:tabnr][l:bufname] = bufnr(l:bufname)
+        endif
     endfunction
 
     function! tab#remove_buffer(tabnr)
-        let l:bufnr = bufnr()
+        let l:bufname = expand('<afile>')
 
         if !exists('g:_tab_set')
             let g:_tab_set = {}
@@ -23,8 +27,8 @@
             let g:_tab_set[a:tabnr] = {}
         endif
 
-        if has_key(g:_tab_set[a:tabnr], l:bufnr)
-            unlet g:_tab_set[a:tabnr][l:bufnr]
+        if has_key(g:_tab_set[a:tabnr], l:bufname)
+            unlet g:_tab_set[a:tabnr][l:bufname]
         endif
     endfunction
 
@@ -36,7 +40,7 @@
 
             " List all buffers for all tabs
             for [tab, buffers] in items(g:_tab_set)
-                let l:bufnames = s:buffer_names(keys(buffers))
+                let l:bufnames = keys(buffers)
 
                 " Use a dictionary to ensure uniqueness
                 for l:buf in l:bufnames
@@ -49,7 +53,7 @@
             " Use a dictionary to form a set
             let l:buf_dict = {}
 
-            let l:bufnames = s:buffer_names(keys(g:_tab_set[l:tabnr]))
+            let l:bufnames = keys(g:_tab_set[l:tabnr])
 
             for l:buf in l:bufnames
                 let l:buf_dict[l:buf] = 1
