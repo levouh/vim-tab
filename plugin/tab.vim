@@ -22,6 +22,9 @@
 
         au BufAdd,VimEnter * call tab#add_buffer(tabpagenr())
         au BufWipeout * call tab#remove_buffer(tabpagenr())
+
+        " TODO: Problem here is that the tab isn't correct
+        au TabClosed * call tab#remove_buffers()
     augroup END
 
 " }}}

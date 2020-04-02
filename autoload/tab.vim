@@ -11,7 +11,7 @@
 
         let l:bufname = expand('<afile>')
 
-        if !empty(l:bufname)
+        if !empty(l:bufname) && buflisted(l:bufname) && !isdirectory(l:bufname)
             let g:_tab_set[a:tabnr][l:bufname] = bufnr(l:bufname)
         endif
     endfunction
@@ -30,6 +30,29 @@
         if has_key(g:_tab_set[a:tabnr], l:bufname)
             unlet g:_tab_set[a:tabnr][l:bufname]
         endif
+    endfunction
+
+    function! tab#remove_buffers()
+        if !exists('g:_tab_set')
+            return
+        endif
+
+        let l:known_tabs = {}
+        for l:tabnr in range(1, tabpagenr('$'))
+            let l:known_tabs[l:tabnr] = 1
+        endfor
+
+        for l:tabnr in keys(g:_tab_set)
+            if !has_key(l:known_tabs, l:tabnr)
+                let l:bufnames = keys(g:_tab_set[l:tabnr])
+
+                for l:buf in l:bufnames
+                    exe 'bwipeout' . bufnr(l:buf)
+                endfor
+
+                unlet g:_tab_set[l:tabnr]
+            endif
+        endfor
     endfunction
 
     function! tab#ls(bang)
