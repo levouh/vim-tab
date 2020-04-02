@@ -64,12 +64,3 @@
     endfunction
 
 " --- }}}
-
-" --- Private functions {{{
-
-    " Names of buffers from buffer number
-    function! s:buffer_names(bufnrs)
-        return map(a:bufnrs, 'bufname(v:val)')
-    endfunction
-
-" --- }}}
