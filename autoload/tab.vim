@@ -47,7 +47,9 @@
                 let l:bufnames = keys(g:_tab_set[l:tabnr])
 
                 for l:buf in l:bufnames
-                    exe 'bwipeout' . bufnr(l:buf)
+                    try
+                        exe 'bwipeout' . bufnr(l:buf)
+                    catc | | endtry
                 endfor
 
                 unlet g:_tab_set[l:tabnr]
