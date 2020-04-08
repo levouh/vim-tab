@@ -69,6 +69,11 @@
 
                 " Use a dictionary to ensure uniqueness
                 for l:buf in l:bufnames
+                    if !buflisted(l:buf)
+                        unlet g:_tab_set[tab][l:buf]
+                        continue
+                    endif
+
                     let l:buf_dict[l:buf] = 1
                 endfor
             endfor
@@ -81,6 +86,11 @@
             let l:bufnames = keys(g:_tab_set[l:tabnr])
 
             for l:buf in l:bufnames
+                if !buflisted(l:buf)
+                    unlet g:_tab_set[l:tabnr][l:buf]
+                    continue
+                endif
+
                 let l:buf_dict[l:buf] = 1
             endfor
 
