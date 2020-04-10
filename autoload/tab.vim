@@ -49,7 +49,7 @@
                 for l:buf in l:bufnames
                     try
                         exe 'bwipeout' . bufnr(l:buf)
-                    catc | | endtry
+                    catch | | endtry
                 endfor
 
                 unlet g:_tab_set[l:tabnr]
