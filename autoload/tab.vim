@@ -5,14 +5,16 @@
             let g:_tab_set = {}
         endif
 
-        if !has_key(g:_tab_set, a:tabnr)
-            let g:_tab_set[a:tabnr] = {}
+        let l:tabid = s:get_tabid(a:tabnr)
+
+        if !has_key(g:_tab_set, l:tabid)
+            let g:_tab_set[l:tabid] = {}
         endif
 
         let l:bufname = expand('<afile>')
 
         if !empty(l:bufname) && buflisted(l:bufname) && !isdirectory(l:bufname)
-            let g:_tab_set[a:tabnr][l:bufname] = bufnr(l:bufname)
+            let g:_tab_set[l:tabid][l:bufname] = bufnr(l:bufname)
         endif
     endfunction
 
@@ -23,12 +25,14 @@
             let g:_tab_set = {}
         endif
 
-        if !has_key(g:_tab_set, a:tabnr)
-            let g:_tab_set[a:tabnr] = {}
+        let l:tabid = s:get_tabid(a:tabnr)
+
+        if !has_key(g:_tab_set, l:tabid)
+            let g:_tab_set[l:tabid] = {}
         endif
 
-        if has_key(g:_tab_set[a:tabnr], l:bufname)
-            unlet g:_tab_set[a:tabnr][l:bufname]
+        if has_key(g:_tab_set[l:tabid], l:bufname)
+            unlet g:_tab_set[l:tabid][l:bufname]
         endif
     endfunction
 
@@ -43,8 +47,10 @@
         endfor
 
         for l:tabnr in keys(g:_tab_set)
-            if !has_key(l:known_tabs, l:tabnr)
-                let l:bufnames = keys(g:_tab_set[l:tabnr])
+            let l:tabid = s:get_tabid(l:tabnr)
+
+            if !has_key(l:known_tabs, l:tabid)
+                let l:bufnames = keys(g:_tab_set[l:tabid])
 
                 for l:buf in l:bufnames
                     try
@@ -52,13 +58,13 @@
                     catch | | endtry
                 endfor
 
-                unlet g:_tab_set[l:tabnr]
+                unlet g:_tab_set[l:tabid]
             endif
         endfor
     endfunction
 
     function! tab#ls(bang)
-        let l:tabnr = tabpagenr()
+        let l:tabid = s:get_tabid(tabpagenr())
 
         if a:bang
             let l:buf_dict = {}
@@ -83,11 +89,11 @@
             " Use a dictionary to form a set
             let l:buf_dict = {}
 
-            let l:bufnames = keys(g:_tab_set[l:tabnr])
+            let l:bufnames = keys(g:_tab_set[l:tabid])
 
             for l:buf in l:bufnames
                 if !buflisted(l:buf)
-                    unlet g:_tab_set[l:tabnr][l:buf]
+                    unlet g:_tab_set[l:tabid][l:buf]
                     continue
                 endif
 
@@ -98,4 +104,26 @@
         endif
     endfunction
 
-" --- }}}
+" }}}
+
+" --- Private functions {{{
+
+    " Get the _tab_id from a tabnr, default to current tab
+    function! s:get_tabid(...)
+        let l:tabnr = a:0 ? a:1 : tabpagenr()
+
+        let l:tabid = gettabvar(l:tabnr, '_tab_id', -1)
+        let l:tabidx = g:_tab_idx
+
+        if l:tabid == -1
+            call settabvar(l:tabnr, '_tab_id', l:tabidx)
+
+            let g:_tab_idx = g:_tab_idx + 1
+
+            return l:tabidx
+        else
+            return l:tabid
+        endif
+    endfunction
+
+" }}}

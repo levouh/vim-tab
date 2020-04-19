@@ -13,6 +13,9 @@
     " Keep a dictionary of buffers opened/closed in different tabs
     let g:_tab_set = {}
 
+    " Tab ID tracking
+    let g:_tab_idx = 0
+
 " }}}
 
 " --- Autocommands {{{
