@@ -43,7 +43,11 @@
 
         let l:known_tabs = {}
         for l:tabnr in range(1, tabpagenr('$'))
-            let l:known_tabs[l:tabnr] = 1
+            let l:tabid = s:get_tabid(l:tabnr)
+
+            if l:tabid != -1
+                let l:known_tabs[l:tabid] = 1
+            endif
         endfor
 
         for l:tabnr in keys(g:_tab_set)
