@@ -50,9 +50,7 @@
             endif
         endfor
 
-        for l:tabnr in keys(g:_tab_set)
-            let l:tabid = s:get_tabid(l:tabnr)
-
+        for l:tabid in keys(g:_tab_set)
             if !has_key(l:known_tabs, l:tabid)
                 let l:bufnames = keys(g:_tab_set[l:tabid])
 
