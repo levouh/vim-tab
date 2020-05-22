@@ -36,6 +36,9 @@
         endif
     endfunction
 
+    " Called when a tab closes, but the autocommand
+    " happens after the tab is closed, so we need to determine
+    " which one is missing.
     function! tab#remove_buffers()
         if !exists('g:_tab_set')
             return
@@ -52,17 +55,30 @@
 
         for l:tabid in keys(g:_tab_set)
             if !has_key(l:known_tabs, l:tabid)
-                let l:bufnames = keys(g:_tab_set[l:tabid])
-
-                for l:buf in l:bufnames
-                    try
-                        exe 'bwipeout' . bufnr(l:buf)
-                    catch | | endtry
-                endfor
-
+                call s:delete_bufs(l:tabid)
                 unlet g:_tab_set[l:tabid]
             endif
         endfor
+    endfunction
+
+    " Clear buffers for the currently focused tab
+    function! tab#clear_hidden()
+        let l:tabid = s:get_tabid()
+        let l:visible = {}
+
+        if !has_key(g:_tab_set, l:tabid)
+            echomsg 'Invalid tabid: ' . l:tabid
+            return
+        endif
+
+        " Don't close visible buffers
+        for tabnr in range(1, tabpagenr('$'))
+            for bufnr in tabpagebuflist(tabnr)
+                let l:visible[bufnr] = 1
+            endfor
+        endfor
+
+        call s:delete_bufs(l:tabid, l:visible)
     endfunction
 
     function! tab#ls(bang)
@@ -126,6 +142,31 @@
         else
             return l:tabid
         endif
+    endfunction
+
+    " Delete buffers for the given tab, if a second
+    " argument is passed, it must be a dictionary with keys
+    " being the buffer numbers that should not be deleted
+    function! s:delete_bufs(tabid, ...) abort
+        let l:bufnames = keys(g:_tab_set[a:tabid])
+
+        if a:0
+            let l:skip = a:1
+        else
+            let l:skip = {}
+        endif
+
+        for l:buf in l:bufnames
+            let l:bufnr = bufnr(l:buf)
+
+            " The buffer is listed and not modified
+            if buflisted(l:bufnr) && !getbufvar(l:bufnr, '&modified')
+                " If the key exists, don't delete the buffer
+                if !has_key(l:skip, l:bufnr)
+                    silent exe 'bdel' . l:bufnr
+                endif
+            endif
+        endfor
     endfunction
 
 " }}}

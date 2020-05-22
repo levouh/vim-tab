@@ -33,6 +33,7 @@
 
 " --- Commands {{{
 
-    command -bang -nargs=0 TLS call tab#ls(<bang>0)
+    command -bang -nargs=0 TabLS call tab#ls(<bang>0)
+    command -nargs=0 TabClear call tab#clear_hidden()
 
 " }}}
