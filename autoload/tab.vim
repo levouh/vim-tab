@@ -149,6 +149,7 @@
     " being the buffer numbers that should not be deleted
     function! s:delete_bufs(tabid, ...) abort
         let l:bufnames = keys(g:_tab_set[a:tabid])
+        let l:cleared = 0
 
         if a:0
             let l:skip = a:1
@@ -164,9 +165,14 @@
                 " If the key exists, don't delete the buffer
                 if !has_key(l:skip, l:bufnr)
                     silent exe 'bdel' . l:bufnr
+                    let l:cleared = l:cleared + 1
                 endif
             endif
         endfor
+
+        if a:0
+            echomsg 'Cleared ' . l:cleared . ' buffer(s)'
+        endif
     endfunction
 
 " }}}
