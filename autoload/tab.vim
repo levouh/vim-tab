@@ -164,7 +164,7 @@
             if buflisted(l:bufnr) && !getbufvar(l:bufnr, '&modified')
                 " If the key exists, don't delete the buffer
                 if !has_key(l:skip, l:bufnr)
-                    silent exe 'bdel' . l:bufnr
+                    silent exe 'bwipeout' . l:bufnr
                     let l:cleared = l:cleared + 1
                 endif
             endif
