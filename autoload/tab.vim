@@ -1,6 +1,48 @@
-" --- Public functions {{{
+" Public functions {{{1
 
-    function! tab#add_buffer(tabnr)
+    fu! tab#tabline() abort " {{{2
+        let tabstr = ''
+
+        " The last tab, so effectively the number of tabs
+        let last_tab = tabpagenr('$')
+
+        " The current focused tab
+        let focused_tab = tabpagenr()
+
+        if last_tab == 1
+            " Don't prompt, just name the tab 'main'
+            "
+            " In the case that this is a new tab, the autocommand
+            " for ":h TabEntered" is called and the tab prefix is
+            " set that way
+            call tab#set_tab_name(v:false, 'main')
+        endif
+
+        for tab_itr in range(1, last_tab)
+            " Select the highlighting
+            let focused = tab_itr == focused_tab
+            let tabstr .= ' ' .. s:get_tab_name(tab_itr, focused)
+        endfor
+
+        " After the last tab fill with TabLineFill and reset tab page nr
+        let tabstr .= '%#TabLineFill#%T'
+
+        return tabstr
+    endfu
+
+    fu! tab#set_tab_name(prompt, ...) " {{{2
+        let prefix = a:0 ? a:1 : gettabvar(tabpagenr(), '_tab_prefix', v:none)
+
+        if prefix is# v:none && a:prompt
+            let prefix = input('Enter tab name: ')
+        endif
+
+        if prefix isnot# v:none
+            call settabvar(tabpagenr(), '_tab_prefix', prefix)
+        endif
+    endfu
+
+    fu! tab#add_buffer(tabnr) " {{{2
         if !exists('g:_tab_set')
             let g:_tab_set = {}
         endif
@@ -16,9 +58,9 @@
         if !empty(l:bufname) && buflisted(l:bufname) && !isdirectory(l:bufname)
             let g:_tab_set[l:tabid][l:bufname] = bufnr(l:bufname)
         endif
-    endfunction
+    endfu
 
-    function! tab#remove_buffer(tabnr)
+    fu! tab#remove_buffer(tabnr) " {{{2
         let l:bufname = expand('<afile>')
 
         if !exists('g:_tab_set')
@@ -34,12 +76,12 @@
         if has_key(g:_tab_set[l:tabid], l:bufname)
             unlet g:_tab_set[l:tabid][l:bufname]
         endif
-    endfunction
+    endfu
 
-    " Called when a tab closes, but the autocommand
-    " happens after the tab is closed, so we need to determine
-    " which one is missing.
-    function! tab#remove_buffers()
+    fu! tab#remove_buffers() " {{{2
+        " Called when a tab closes, but the autocommand
+        " happens after the tab is closed, so we need to determine
+        " which one is missing.
         if !exists('g:_tab_set')
             return
         endif
@@ -59,10 +101,10 @@
                 unlet g:_tab_set[l:tabid]
             endif
         endfor
-    endfunction
+    endfu
 
-    " Clear buffers for the currently focused tab
-    function! tab#clear_hidden()
+    fu! tab#clear_hidden() " {{{2
+        " Clear buffers for the currently focused tab
         let l:tabid = s:get_tabid()
         let l:visible = {}
 
@@ -79,9 +121,9 @@
         endfor
 
         call s:delete_bufs(l:tabid, l:visible)
-    endfunction
+    endfu
 
-    function! tab#ls(bang)
+    fu! tab#ls(bang) " {{{2
         let l:tabid = s:get_tabid(tabpagenr())
 
         if a:bang
@@ -120,14 +162,12 @@
 
             return keys(l:buf_dict)
         endif
-    endfunction
+    endfu
 
-" }}}
+" Private functions {{{1
 
-" --- Private functions {{{
-
-    " Get the _tab_id from a tabnr, default to current tab
-    function! s:get_tabid(...)
+    fu! s:get_tabid(...) " {{{2
+        " Get the _tab_id from a tabnr, default to current tab
         let l:tabnr = a:0 ? a:1 : tabpagenr()
 
         let l:tabid = gettabvar(l:tabnr, '_tab_id', -1)
@@ -142,12 +182,12 @@
         else
             return l:tabid
         endif
-    endfunction
+    endfu
 
-    " Delete buffers for the given tab, if a second
-    " argument is passed, it must be a dictionary with keys
-    " being the buffer numbers that should not be deleted
-    function! s:delete_bufs(tabid, ...) abort
+    fu! s:delete_bufs(tabid, ...) abort " {{{2
+        " Delete buffers for the given tab, if a second
+        " argument is passed, it must be a dictionary with keys
+        " being the buffer numbers that should not be deleted
         let l:bufnames = keys(g:_tab_set[a:tabid])
         let l:cleared = 0
 
@@ -173,6 +213,26 @@
         if a:0
             echomsg 'Cleared ' . l:cleared . ' buffer(s)'
         endif
-    endfunction
+    endfu
 
-" }}}
+    fu! s:get_tab_name(tabnr, focused) abort " {{{2
+        let tab_name = gettabvar(a:tabnr, '_tab_prefix', v:none)
+        let prefix = tab_name is# v:none ? '' : tab_name
+
+        let tabstr = ''
+
+        if a:focused
+            " Highlighting for the selected tab
+            let tabstr .= '%#TabLineSel#'
+        else
+            let tabstr .= '%#TabLine#'
+        endif
+
+        " Set the tab page number (for mouse clicks)
+        let tabstr .= '%' .. a:tabnr .. 'T'
+
+        " The directory of the tab, relative to the users home directory
+        let dir_str = fnamemodify(getcwd(-1, a:tabnr), ':~')
+
+        return tabstr .. prefix .. ' [' .. dir_str .. ']'
+    endfu

@@ -1,4 +1,4 @@
-" --- Verification {{{
+" Verification {{{1
 
     if exists('g:_loaded_tab') || v:version < 802 || &cp
         finish
@@ -6,9 +6,7 @@
 
     let g:_loaded_tab = 1
 
-" }}}
-
-" --- Veriables {{{
+" Veriables {{{1
 
     " Keep a dictionary of buffers opened/closed in different tabs
     let g:_tab_set = {}
@@ -16,9 +14,7 @@
     " Tab ID tracking
     let g:_tab_idx = 0
 
-" }}}
-
-" --- Autocommands {{{
+" Autocommands {{{1
 
     augroup tab
         au!
@@ -27,13 +23,15 @@
         au BufWipeout * call tab#remove_buffer(tabpagenr())
 
         au TabClosed * call tab#remove_buffers()
+
+        " Needs to be an autocommand so that the tab page is correct
+        au TabEnter * call tab#set_tab_name(v:true)
+        "                                      │
+        "                                      └ prompt user to name tab
+
     augroup END
 
-" }}}
-
-" --- Commands {{{
+" Commands {{{1
 
     command -bang -nargs=0 TabLS call tab#ls(<bang>0)
     command -nargs=0 TabClear call tab#clear_hidden()
-
-" }}}
