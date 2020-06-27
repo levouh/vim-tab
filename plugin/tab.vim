@@ -6,7 +6,7 @@
 
     let g:_loaded_tab = 1
 
-" Veriables {{{1
+" Variables {{{1
 
     " Keep a dictionary of buffers opened/closed in different tabs
     let g:_tab_set = {}
@@ -20,15 +20,14 @@
         au!
 
         au BufAdd,VimEnter * call tab#add_buffer(tabpagenr())
-        au BufWipeout * call tab#remove_buffer(tabpagenr())
 
+        au BufWipeout * call tab#remove_buffer(tabpagenr())
         au TabClosed * call tab#remove_buffers()
 
         " Needs to be an autocommand so that the tab page is correct
         au TabEnter * call tab#set_tab_name(v:true)
         "                                      │
         "                                      └ prompt user to name tab
-
     augroup END
 
 " Commands {{{1
