@@ -16,9 +16,7 @@
 
 " Autocommands {{{1
 
-    augroup tab
-        au!
-
+    augroup tab | au!
         au BufAdd,VimEnter * call tab#add_buffer(tabpagenr())
 
         au BufWipeout * call tab#remove_buffer(tabpagenr())
@@ -32,5 +30,8 @@
 
 " Commands {{{1
 
-    command -bang -nargs=0 TabLS call tab#ls(<bang>0)
+    " Clear all hidden buffers for the current tab
     command -nargs=0 TabClear call tab#clear_hidden()
+
+    " Open the buffer list using fzf
+    command! -bang TabBuffers call tab#wrap_fzf(<bang>0)
