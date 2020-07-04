@@ -192,6 +192,7 @@ fu! tab#wrap_fzf(bang) " {{{1
 
             call fzf#run(fzf#wrap(fzf#vim#with_preview({
                 \ 'source': tab#ls(a:bang, v:false),
+                \ 'options': '--layout=reverse --multi --bind ctrl-a:select-all',
             \ })))
         finally
             let g:fzf_action = action_map
@@ -278,32 +279,33 @@ fu! s:bufnr(buf_str) " {{{1
 endfu
 
 fu! s:edit(choice) " {{{1
+    " Only support a single entry here
     if len(a:choice)
         silent! exe 'b ' .. s:bufnr(a:choice[0])
     endif
 endfu
 
-fu! s:edit_tab(choice) " {{{1
-    if len(a:choice)
-        silent! exe 'tab sb ' .. s:bufnr(a:choice[0])
-    endif
+fu! s:edit_tab(choices) " {{{1
+    for choice in a:choices
+        silent! exe 'tab sb ' .. s:bufnr(choice)
+    endfor
 endfu
 
-fu! s:edit_vert(choice) " {{{1
-    if len(a:choice)
-        silent! exe 'vert sb ' .. s:bufnr(a:choice[0])
-    endif
+fu! s:edit_vert(choices) " {{{1
+    for choice in a:choices
+        silent! exe 'vert sb ' .. s:bufnr(choice)
+    endfor
 endfu
 
-fu! s:edit_split(choice) " {{{1
-    if len(a:choice)
-        silent! exe 'sb ' .. s:bufnr(a:choice[0])
-    endif
+fu! s:edit_split(choices) " {{{1
+    for choice in a:choices
+        silent! exe 'sb ' .. s:bufnr(choice)
+    endfor
 endfu
-fu! s:wipe_buf(choice) " {{{1
-    if len(a:choice)
-        silent! exe 'bwipeout ' .. s:bufnr(a:choice[0])
-    endif
+fu! s:wipe_buf(choices) " {{{1
+    for choice in a:choices
+        silent! exe 'bwipeout ' .. s:bufnr(choice)
+    endfor
 
     if exists('s:tab_ls_bang')
         call tab#wrap_fzf(t:tab_ls_bang)
