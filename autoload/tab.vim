@@ -143,7 +143,7 @@ fu! tab#ls(bang, print) " {{{1
                     continue
                 endif
 
-                call add(buf_list, '[' .. bufnr .. '] ' .. g:_tab_set[tabid][bufnr])
+                call add(buf_list, s:format_buf_str(tabid, bufnr))
             endfor
         endfor
     else
@@ -155,7 +155,7 @@ fu! tab#ls(bang, print) " {{{1
                 continue
             endif
 
-            call add(buf_list, '[' .. bufnr .. '] ' .. g:_tab_set[tabid][bufnr])
+            call add(buf_list, s:format_buf_str(tabid, bufnr))
         endfor
     endif
 
@@ -312,4 +312,9 @@ fu! s:wipe_buf(choices) " {{{1
     else
         call tab#wrap_fzf(0)
     endif
+endfu
+
+fu! s:format_buf_str(tabid, bufnr)
+    let modified = getbufinfo(a:bufnr)[0].changed ? '*' : ''
+    return '[' .. a:bufnr .. '] ' .. modified .. g:_tab_set[a:tabid][a:bufnr]
 endfu
