@@ -35,3 +35,9 @@
 
     " Open the buffer list using fzf
     command! -bang TabBuffers call tab#wrap_fzf(<bang>0)
+
+    " Set the name for any given tab
+    "
+    " Pass "v:true" to prompt the user for the tab name, and again
+    " to force the renaming of the tab even though it is already named
+    command! -bang TabRename call tab#tab_rename()

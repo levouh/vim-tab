@@ -1,3 +1,15 @@
+" See "tab#set_tab_name" for more details on the use of this {{{
+" script-local variable
+let s:skip_au = v:false " }}}
+" When the tabline is initially setup, it will name the initial tab {{{
+" "main", assuming that this is startup if there is only a single tab
+" that exists.
+"
+" However, when closing all tabs but the last tab, it will also find
+" the same count and reset the name of the last tab to be "main" as
+" well, which is not what we want. After the initial setup, just
+" change the value of this variable to skip that behavior.
+let s:setup_main = v:false " }}}
 fu! tab#tabline() abort " {{{1
     let tabstr = ''
 
@@ -7,13 +19,20 @@ fu! tab#tabline() abort " {{{1
     " The current focused tab
     let focused_tab = tabpagenr()
 
-    if last_tab == 1
+    if last_tab == 1 && s:setup_main is# v:false
         " Don't prompt, just name the tab 'main'
         "
         " In the case that this is a new tab, the autocommand
         " for ":h TabEntered" is called and the tab prefix is
         " set that way
+        "
+        " Don't force the rename to happen, this is the first
+        " tab that is created and provides a clunky experience
         call tab#set_tab_name(v:false, 'main')
+
+        " Don't do this again, when closing to the last tab for
+        " instance
+        let s:setup_main = v:true
     endif
 
     for tab_itr in range(1, last_tab)
@@ -28,11 +47,55 @@ fu! tab#tabline() abort " {{{1
     return tabstr
 endfu
 
+
+fu! tab#tab_rename() abort " {{{1
+    let prefix = input('Enter tab name: ')
+
+    if empty(prefix)
+        " User has cancelled action, or input nothing
+        return
+    endif
+
+    call settabvar(tabpagenr(), '_tab_prefix', prefix)
+
+    " Immediately show user updates
+    "
+    " See "tab#set_tab_name" for details on why we set "s:skip_au"
+    let s:skip_au = v:true
+
+    try
+        redrawtabline
+    finally
+        " Ensure the value is restored, regardless of the success from
+        " the above call
+        let s:skip_au = v:false
+    endtry
+endfu
+
 fu! tab#set_tab_name(prompt, ...) " {{{1
+    if s:skip_au
+        " This call actually causes this function to be called again
+        " via the ":h TabEntered" autocommand, so before this function
+        " even finishes, the functionality has to be put in another
+        " function.
+        "
+        " From this we will grab the name of the tab, and effectively
+        " reset it, so when this value is set to "v:true" just skip
+        " the functionality in this function
+        return
+    endif
+
     let prefix = a:0 ? a:1 : gettabvar(tabpagenr(), '_tab_prefix', v:none)
 
+    " Checking whether or not the prefix is necessary here because the
+    " autocommand is not just triggered when a tab is created, but any
+    " time that it is entered.
     if prefix is# v:none && a:prompt
         let prefix = input('Enter tab name: ')
+
+        if empty(prefix)
+            let prefix = v:none
+        endif
     endif
 
     if prefix isnot# v:none
