@@ -255,7 +255,7 @@ fu! tab#wrap_fzf(bang) " {{{1
 
             call fzf#run(fzf#wrap(fzf#vim#with_preview({
                 \ 'source': tab#ls(a:bang, v:false),
-                \ 'options': '--layout=reverse --multi --bind ctrl-a:select-all',
+                \ 'options': '--layout=reverse --multi --bind ctrl-a:select-all --delimiter \  --nth 3..',
             \ })))
         finally
             let g:fzf_action = action_map
@@ -377,7 +377,13 @@ fu! s:wipe_buf(choices) " {{{1
     endif
 endfu
 
-fu! s:format_buf_str(tabid, bufnr)
+fu! s:format_buf_str(tabid, bufnr) " {{{1
     let modified = getbufinfo(a:bufnr)[0].changed ? '*' : ''
-    return '[' .. a:bufnr .. '] ' .. modified .. g:_tab_set[a:tabid][a:bufnr]
+
+    let buftype = getbufvar(a:bufnr, '&buftype')
+    let filetype = getbufvar(a:bufnr, '&filetype')
+
+    let type = buftype == 'terminal' ? buftype : filetype
+
+    return '[' .. a:bufnr .. ']' .. modified .. ' [' .. type .. '] ' .. g:_tab_set[a:tabid][a:bufnr]
 endfu
